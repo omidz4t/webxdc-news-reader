@@ -10,6 +10,7 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  pages: write
   id-token: write
 
 jobs:
@@ -44,6 +45,25 @@ jobs:
           name: news-reader-xdc
           path: dist/*.xdc
           retention-days: 30
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   semantic-release:
     name: Semantic Release
@@ -82,7 +102,7 @@ jobs:
         run: npx semantic-release
 
   build-summary:
-    needs: [build, semantic-release]
+    needs: [build, semantic-release, deploy-pages]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -99,4 +119,5 @@ jobs:
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Pages | ${{ needs.deploy-pages.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Semantic Release | ${{ needs.semantic-release.result }} |" >> $GITHUB_STEP_SUMMARY

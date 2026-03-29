@@ -1,42 +1,39 @@
-# sv
+# 📰 WebXDC News Reader
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A [WebXDC](https://webxdc.org/) app for reading and browsing news from Telegram channels inside [Delta Chat](https://delta.chat/).
 
-## Creating a project
+[![CI Pipeline](https://github.com/omidz4t/webxdc-news-reader/actions/workflows/pipeline.yml/badge.svg)](https://github.com/omidz4t/webxdc-news-reader/actions)
+[![GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-blue)](https://omidz4t.github.io/webxdc-news-reader/)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```sh
-# create a new project
-npx sv create my-app
-```
+- 📱 Mobile-first, Telegram-style message layout
+- 🖼️ Image lightbox with swipe navigation
+- 🔗 Link extraction and preview
+- 🌙 Dark mode support
+- 📦 Packaged as `.xdc` for Delta Chat
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.13.0 create --template minimal --types ts --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Development
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun install
+bun run dev
 ```
 
-## Building
-
-To create a production version of your app:
+## Build
 
 ```sh
-npm run build
+# Build the web app
+bun run build
+
+# Package as .xdc
+bun run package
 ```
 
-You can preview the production build with `npm run preview`.
+## Demo
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+A live preview is available at [omidz4t.github.io/webxdc-news-reader](https://omidz4t.github.io/webxdc-news-reader/).
+
+## License
+
+This project is licensed under the [GNU Lesser General Public License v3.0](LICENSE).
