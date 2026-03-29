@@ -33,20 +33,21 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Package XDC
+      - name: Package artifacts
         run: |
           VERSION=$(bun -e "console.log(require('./package.json').version)")
           mkdir -p dist
           cp manifest.toml build/
           cd build
           zip -r ../dist/news-reader-v${VERSION}.xdc .
-          echo "Created dist/news-reader-v${VERSION}.xdc"
+          zip -r ../dist/news-reader-v${VERSION}.zip .
+          echo "Created dist/news-reader-v${VERSION}.xdc and .zip"
 
-      - name: Upload XDC artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: news-reader-xdc
-          path: dist/*.xdc
+          name: news-reader-artifacts
+          path: dist/*
           retention-days: 30
 
       - name: Upload Pages artifact
@@ -98,6 +99,8 @@ jobs:
           cp manifest.toml build/
           cd build
           zip -r ../dist/news-reader-v${VERSION}.xdc .
+          zip -r ../dist/news-reader-v${VERSION}.zip .
+          echo "Created artifacts for version ${VERSION}"
 
       - name: Release
         env:

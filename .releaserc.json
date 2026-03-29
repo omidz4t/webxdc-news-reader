@@ -25,6 +25,10 @@
                     {
                         "path": "dist/news-reader-v*.xdc",
                         "label": "News Reader WebXDC (${nextRelease.version})"
+                    },
+                    {
+                        "path": "dist/news-reader-v*.zip",
+                        "label": "News Reader Build Zip (${nextRelease.version})"
                     }
                 ]
             }
