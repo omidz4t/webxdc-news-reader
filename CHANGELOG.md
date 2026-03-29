@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/omidz4t/webxdc-news-reader/compare/v1.1.1...v1.2.0) (2026-03-29)
+
+
+### Features
+
+* automate version tracking and display in header ([3c53810](https://github.com/omidz4t/webxdc-news-reader/commit/3c538104bba0a4f4bd48d56f4940e66a2a74d97c))
+
 ## [1.1.1](https://github.com/omidz4t/webxdc-news-reader/compare/v1.1.0...v1.1.1) (2026-03-29)
 
 
