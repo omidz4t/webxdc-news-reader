@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/omidz4t/webxdc-news-reader/compare/v1.1.0...v1.1.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* opt into Node.js 24 for GitHub Actions ([8750a15](https://github.com/omidz4t/webxdc-news-reader/commit/8750a154b09f10c63a56fad6f466a5fbe3a3f33a))
+
 # [1.1.0](https://github.com/omidz4t/webxdc-news-reader/compare/v1.0.0...v1.1.0) (2026-03-29)
 
 
