@@ -31,7 +31,7 @@ An object that includes channel information and the list of messages. This is be
 {
   "channels": {
     "BBC World": {
-      "photo": "https://example.com/bbc.png"
+      "photo": "data:image/png;base64,iVBORw0KGgo..."
     }
   },
   "messages": [
@@ -41,7 +41,7 @@ An object that includes channel information and the list of messages. This is be
       "chat": "BBC World",
       "text": "Testing the [News Reader](https://webxdc.org) app!",
       "timestamp": "2026-03-29T10:00:00Z",
-      "image": "https://example.com/news-image.jpg"
+      "image": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
     }
   ]
 }
@@ -59,11 +59,12 @@ Each message object can have these fields:
 | `text` | string | **Yes** | The message content. Supports links like `[label](url)`. |
 | `timestamp` | string | **Yes** | ISO date format (e.g., `2026-03-29T18:00:00Z`). |
 | `id` | string | No | A unique ID for deduplication. |
-| `image` | string | No | URL of an image to show in the message. |
+| `image` | string | No | URL or Base64 of an image to show in the message. |
 | `media` | string | No | Name or link of a file attachment. |
-| `channel_photo`| string | No | URL of the channel avatar. |
+| `channel_photo`| string | No | URL or Base64 of the channel avatar. |
 
 ## Important Notes
 - **Deduplication**: If you merge multiple files, the app uses the `id` field to remove duplicate messages. If no `id` is present, it creates one from the sender, timestamp, and text.
 - **Sorting**: The app automatically sorts all messages by time.
 - **Links**: You can use standard URLs (e.g., `https://google.com`) or Markdown-style links.
+- **Images**: For the `image`, `photo`, and `channel_photo` fields, you should mostly use **Base64** strings (e.g., `data:image/jpeg;base64,...`) to keep the data inside the file, but standard URLs also work.
