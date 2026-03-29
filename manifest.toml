@@ -1,5 +1,5 @@
 name = "News Reader"
 description = "A webxdc app to decompress and show conversations from files."
-version = "0.0.1"
+version = "1.1.1"
 author = "Omid Zamani"
-icon = "icon.png"
+icon = "icon.webp"

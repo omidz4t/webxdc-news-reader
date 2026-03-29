@@ -10,7 +10,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"package": "vite build && cp manifest.toml build/ && cd build && mkdir -p ../dist && rm -f ../dist/news-reader-v$npm_package_version.xdc && zip -r ../dist/news-reader-v$npm_package_version.xdc . && echo \"Created dist/news-reader-v$npm_package_version.xdc\""
+		"package": "sed -i 's/version = \".*\"/version = \"'$npm_package_version'\"/' manifest.toml && vite build && cp manifest.toml build/ && cd build && mkdir -p ../dist && rm -f ../dist/news-reader-v$npm_package_version.xdc && zip -r ../dist/news-reader-v$npm_package_version.xdc . && echo \"Created dist/news-reader-v$npm_package_version.xdc\""
 	},
 	"repository": {
 		"type": "git",

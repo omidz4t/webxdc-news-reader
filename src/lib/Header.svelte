@@ -39,6 +39,15 @@
 			? channels.find(c => c.name === selectedChannel)?.count || 0 
 			: msgCount
 	);
+
+	let appVersion = $state(__APP_VERSION__ || '');
+	$effect(() => {
+		try {
+			// @ts-ignore
+			const info = window.webxdc.getAppInfo();
+			if (info?.version) appVersion = info.version;
+		} catch (e) { /* ignore */ }
+	});
 </script>
 
 <header class="tg-channel-header" class:selection-mode={selectedCount > 0} class:search-mode={isSearching}>
@@ -85,7 +94,12 @@
 		<Avatar name={displayLabel} photo={selectedChannel ? channels.find(c => c.name === selectedChannel)?.photo : null} size="42px" fontSize="0.85rem" />
 		<div class="tg-channel-info">
 			<div class="tg-channel-name">{displayLabel}</div>
-			<div class="tg-channel-meta">{displayCount} messages · {fileName}</div>
+			<div class="tg-channel-meta">
+				{displayCount} messages · {fileName}
+				{#if appVersion}
+					· <span class="header-version">v{appVersion}</span>
+				{/if}
+			</div>
 		</div>
 		
 		<div class="header-actions">
