@@ -13,6 +13,10 @@ A [WebXDC](https://webxdc.org/) app for reading and browsing news from Telegram 
 - 🌙 Dark mode support
 - 📦 Packaged as `.xdc` for Delta Chat
 
+## Data Format
+
+The app reads news from `.json` or compressed `.gz` files. See [docs/FORMAT.md](docs/FORMAT.md) for details on the file structure.
+
 ## Development
 
 ```sh
