@@ -1,6 +1,6 @@
 {
 	"name": "webxdc-news-reader",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "A WebXDC app for reading and browsing news from Telegram channels inside Delta Chat.",
 	"type": "module",
 	"scripts": {

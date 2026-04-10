@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/omidz4t/webxdc-news-reader/compare/v1.2.0...v1.2.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* add reorder and time search to header ([9ea65ae](https://github.com/omidz4t/webxdc-news-reader/commit/9ea65ae31ef88486bc3aa557d0ca6bcefe68415e))
+
 # [1.2.0](https://github.com/omidz4t/webxdc-news-reader/compare/v1.1.1...v1.2.0) (2026-03-29)
 
 
