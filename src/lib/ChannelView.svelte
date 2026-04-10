@@ -19,6 +19,7 @@
 	let viewMode: "feed" | "grid" = $state("feed");
 	let isSearching = $state(false);
 	let searchQuery = $state("");
+	let sortOrder: 'asc' | 'desc' = $state('asc');
 
 	// Reset selection when loading a NEW set of messages (e.g. merging files)
 	let lastCount = $state(0);
@@ -30,6 +31,7 @@
 			viewMode = "feed";
 			isSearching = false;
 			searchQuery = "";
+			sortOrder = 'asc';
 		}
 	});
 
@@ -38,8 +40,8 @@
 		Object.fromEntries(channels.map((c) => [c.name, c.photo])),
 	);
 
-	let filteredMessages = $derived(
-		messages.filter((m) => {
+	let filteredMessages = $derived.by(() => {
+		const filtered = messages.filter((m) => {
 			const channelMatch = !selectedChannel || m.chat === selectedChannel;
 			const query = searchQuery.toLowerCase().trim();
 			if (!query) return channelMatch;
@@ -50,8 +52,25 @@
 				m.chat.toLowerCase().includes(query);
 			
 			return channelMatch && searchMatch;
-		})
-	);
+		});
+		if (sortOrder === 'desc') {
+			return [...filtered].reverse();
+		}
+		return filtered;
+	});
+
+	// Timestamp range for the time picker
+	function toLocalIso(ts: string): string {
+		try {
+			const d = new Date(ts);
+			// Return YYYY-MM-DDTHH:MM format for datetime-local
+			const pad = (n: number) => n.toString().padStart(2, '0');
+			return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+		} catch { return ''; }
+	}
+
+	let minTimestamp = $derived(messages.length > 0 ? toLocalIso(messages[0].timestamp) : '');
+	let maxTimestamp = $derived(messages.length > 0 ? toLocalIso(messages[messages.length - 1].timestamp) : '');
 
 	function handleSelectChannel(name: string | null) {
 		selectedIds = new Set();
@@ -78,6 +97,42 @@
 			isSearching = false;
 			searchQuery = "";
 			window.scrollTo({ top: 0 });
+		}
+	}
+
+	function toggleSort() {
+		sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	function jumpToTime(datetime: string) {
+		const target = new Date(datetime).getTime();
+		// Find nearest message in the DISPLAYED (sorted) list
+		let bestIdx = 0;
+		let bestDiff = Infinity;
+		for (let i = 0; i < filteredMessages.length; i++) {
+			const diff = Math.abs(new Date(filteredMessages[i].timestamp).getTime() - target);
+			if (diff < bestDiff) {
+				bestDiff = diff;
+				bestIdx = i;
+			}
+		}
+		if (filteredMessages.length === 0) return;
+		const msg = filteredMessages[bestIdx];
+		const msgId = getMsgId(msg);
+		// Try to find the DOM element
+		// Messages use the keyed each block, find the article by data attribute
+		const el = document.querySelector(`[data-msg-id="${CSS.escape(msgId)}"]`);
+		if (el) {
+			const offset = 80;
+			const bodyRect = document.body.getBoundingClientRect().top;
+			const elementRect = el.getBoundingClientRect().top;
+			const elementPosition = elementRect - bodyRect;
+			const offsetPosition = elementPosition - offset;
+			window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+			// Flash highlight
+			el.classList.add('jump-highlight');
+			setTimeout(() => el.classList.remove('jump-highlight'), 2000);
 		}
 	}
 
@@ -162,6 +217,11 @@
 		onToggleView={toggleView}
 		onCancelSelection={cancelSelection}
 		onCopySelected={copySelected}
+		{sortOrder}
+		onToggleSort={toggleSort}
+		onJumpToTime={jumpToTime}
+		{minTimestamp}
+		{maxTimestamp}
 	/>
 
 	{#if viewMode === "feed"}
@@ -176,6 +236,7 @@
 					{#each group.messages as msg (getMsgId(msg))}
 						<Message
 							{msg}
+							msgId={getMsgId(msg)}
 							isSelected={selectedIds.has(getMsgId(msg))}
 							{searchQuery}
 							channelPhoto={channelPhotoMap[msg.chat]}
@@ -441,5 +502,15 @@
 		.channels-grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	/* Jump-to-time highlight animation */
+	:global(.jump-highlight) {
+		animation: jumpFlash 2s ease-out;
+	}
+	@keyframes jumpFlash {
+		0% { background-color: rgba(94, 170, 236, 0.25); }
+		70% { background-color: rgba(94, 170, 236, 0.1); }
+		100% { background-color: transparent; }
 	}
 </style>

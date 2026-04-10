@@ -18,19 +18,42 @@
 		isSearching: boolean;
 		onToggleSearch: () => void;
 		onUpdateSearch: (query: string) => void;
+		sortOrder: 'asc' | 'desc';
+		onToggleSort: () => void;
+		onJumpToTime: (datetime: string) => void;
+		minTimestamp?: string;
+		maxTimestamp?: string;
 	}
 
 	let { 
 		channelName, msgCount, fileName, channels, onReset, 
 		selectedChannel, viewMode, selectedCount,
 		onSelectChannel, onToggleView, onCancelSelection, onCopySelected,
-		searchQuery, isSearching, onToggleSearch, onUpdateSearch
+		searchQuery, isSearching, onToggleSearch, onUpdateSearch,
+		sortOrder, onToggleSort, onJumpToTime,
+		minTimestamp = '', maxTimestamp = ''
 	}: Props = $props();
 
 	let searchInput = $state<HTMLInputElement>();
+	let showTimePicker = $state(false);
+	let timePickerValue = $state('');
+
 	$effect(() => {
 		if (isSearching) searchInput?.focus();
 	});
+
+	function handleTimeSubmit() {
+		if (timePickerValue) {
+			onJumpToTime(timePickerValue);
+			showTimePicker = false;
+			timePickerValue = '';
+		}
+	}
+
+	function closeTimePicker() {
+		showTimePicker = false;
+		timePickerValue = '';
+	}
 
 	// Current display name
 	let displayLabel = $derived(selectedChannel || 'Batched News');
@@ -91,15 +114,24 @@
 			</button>
 		</div>
 	{:else}
-		<Avatar name={displayLabel} photo={selectedChannel ? channels.find(c => c.name === selectedChannel)?.photo : null} size="42px" fontSize="0.85rem" />
-		<div class="tg-channel-info">
-			<div class="tg-channel-name">{displayLabel}</div>
-			<div class="tg-channel-meta">
-				{displayCount} messages · {fileName}
-				{#if appVersion}
-					· <span class="header-version">v{appVersion}</span>
-				{/if}
+		<div class="header-top-row">
+			<Avatar name={displayLabel} photo={selectedChannel ? channels.find(c => c.name === selectedChannel)?.photo : null} size="42px" fontSize="0.85rem" />
+			<div class="tg-channel-info">
+				<div class="tg-channel-name">{displayLabel}</div>
+				<div class="tg-channel-meta">
+					{displayCount} messages · {fileName}
+					{#if appVersion}
+						· <span class="header-version">v{appVersion}</span>
+					{/if}
+				</div>
 			</div>
+
+			<button class="tg-header-btn close-btn" onclick={onReset} title="Load another file" aria-label="Close">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 		</div>
 		
 		<div class="header-actions">
@@ -112,6 +144,36 @@
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<circle cx="11" cy="11" r="8"></circle>
 					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+			</button>
+
+			<!-- Sort order toggle -->
+			<button 
+				class="tg-header-btn"
+				class:active={sortOrder === 'desc'}
+				onclick={onToggleSort}
+				title={sortOrder === 'asc' ? 'Newest first' : 'Oldest first'}
+				aria-label={sortOrder === 'asc' ? 'Sort newest first' : 'Sort oldest first'}
+			>
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+					style="transform: {sortOrder === 'desc' ? 'scaleY(-1)' : 'none'}; transition: transform 0.3s ease"
+				>
+					<line x1="12" y1="5" x2="12" y2="19"></line>
+					<polyline points="19 12 12 19 5 12"></polyline>
+				</svg>
+			</button>
+
+			<!-- Jump to time -->
+			<button 
+				class="tg-header-btn"
+				class:active={showTimePicker}
+				onclick={() => showTimePicker = !showTimePicker}
+				title="Jump to time"
+				aria-label="Jump to time"
+			>
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10"></circle>
+					<polyline points="12 6 12 12 16 14"></polyline>
 				</svg>
 			</button>
 
@@ -134,8 +196,8 @@
 					{/if}
 				</svg>
 			</button>
-			
-			<button class="tg-header-btn" onclick={onReset} title="Load another file" aria-label="Close">
+
+			<button class="tg-header-btn actions-close-btn" onclick={onReset} title="Load another file" aria-label="Close">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>
@@ -144,6 +206,27 @@
 		</div>
 	{/if}
 </header>
+
+{#if showTimePicker}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="time-picker-overlay" onclick={closeTimePicker}></div>
+	<div class="time-picker-popup">
+		<div class="time-picker-header">Jump to Time</div>
+		<input 
+			type="datetime-local" 
+			class="time-picker-input"
+			bind:value={timePickerValue}
+			min={minTimestamp}
+			max={maxTimestamp}
+			onkeydown={(e) => e.key === 'Enter' && handleTimeSubmit()}
+		/>
+		<div class="time-picker-actions">
+			<button class="time-picker-btn cancel" onclick={closeTimePicker}>Cancel</button>
+			<button class="time-picker-btn go" onclick={handleTimeSubmit} disabled={!timePickerValue}>Go</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.tg-channel-header {
@@ -157,6 +240,12 @@
 		box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		min-height: 48px;
+		flex-wrap: wrap;
+	}
+
+	.header-top-row {
+		display: flex; align-items: center; gap: 0.75rem;
+		flex: 1 1 100%;
 	}
 
 	.tg-channel-info { flex: 1; min-width: 0; }
@@ -169,6 +258,11 @@
 		font-size: 0.75rem; color: var(--text-secondary);
 	}
 	
+	/* Close button in top row: only on mobile */
+	.close-btn { display: none; }
+	/* Close button in actions row: shown on desktop */
+	.actions-close-btn { display: flex; }
+
 	.header-actions {
 		display: flex; gap: 0.5rem;
 	}
@@ -236,9 +330,137 @@
 	.tg-header-btn:active { transform: scale(0.95); }
 	.tg-header-btn.active { background: var(--accent); color: white; }
 
+	/* Time picker popup */
+	.time-picker-overlay {
+		position: fixed; inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 200;
+		animation: fadeIn 0.15s ease-out;
+	}
+	.time-picker-popup {
+		position: fixed;
+		top: 50%; left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 201;
+		background: #1c2a36;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		padding: 1.5rem;
+		min-width: 280px;
+		width: 90%;
+		max-width: 340px;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+		animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.time-picker-header {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--accent);
+		margin-bottom: 0.75rem;
+	}
+	.time-picker-input {
+		width: 100%;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 10px;
+		padding: 0.6rem 0.75rem;
+		color: white;
+		font-size: 0.9rem;
+		outline: none;
+		transition: all 0.2s;
+		box-sizing: border-box;
+		color-scheme: dark;
+	}
+	.time-picker-input:focus {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px rgba(94, 170, 236, 0.2);
+	}
+	.time-picker-actions {
+		display: flex; gap: 0.5rem;
+		margin-top: 0.75rem;
+		justify-content: flex-end;
+	}
+	.time-picker-btn {
+		padding: 0.45rem 1rem;
+		border-radius: 8px;
+		border: none;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	.time-picker-btn.cancel {
+		background: rgba(255, 255, 255, 0.06);
+		color: var(--text-secondary);
+	}
+	.time-picker-btn.cancel:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: white;
+	}
+	.time-picker-btn.go {
+		background: var(--accent);
+		color: white;
+	}
+	.time-picker-btn.go:hover {
+		filter: brightness(1.1);
+	}
+	.time-picker-btn.go:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
 	@keyframes fadeIn {
 		from { opacity: 0; transform: translateY(-5px); }
 		to { opacity: 1; transform: translateY(0); }
+	}
+	@keyframes slideDown {
+		from { opacity: 0; transform: translateY(-10px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	@keyframes modalIn {
+		from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+		to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+	}
+
+	/* ── Mobile two-row layout ── */
+	@media (max-width: 520px) {
+		.tg-channel-header {
+			gap: 0.5rem;
+			padding: 0.6rem 0.75rem;
+		}
+
+		.header-top-row {
+			flex: 1 1 100%;
+			gap: 0.6rem;
+		}
+
+		.close-btn {
+			display: flex;
+		}
+
+		.actions-close-btn {
+			display: none;
+		}
+
+		.header-actions {
+			flex: 1 1 100%;
+			justify-content: center;
+			gap: 0.75rem;
+			padding-top: 0.25rem;
+			border-top: 1px solid rgba(255, 255, 255, 0.06);
+		}
+
+		.tg-header-btn {
+			width: 34px; height: 34px;
+			border-radius: 8px;
+		}
+	}
+
+	/* Desktop: single row — hide close in top row, show in actions */
+	@media (min-width: 521px) {
+		.header-top-row {
+			flex: 1 1 auto;
+		}
 	}
 </style>
 

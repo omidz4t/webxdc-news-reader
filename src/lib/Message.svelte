@@ -5,13 +5,14 @@
 
 	interface Props {
 		msg: MessageType;
+		msgId?: string;
 		isSelected: boolean;
 		onToggle: () => void;
 		searchQuery?: string;
 		channelPhoto?: string | null;
 	}
 
-	let { msg, isSelected, onToggle, searchQuery = '', channelPhoto = null }: Props = $props();
+	let { msg, msgId = '', isSelected, onToggle, searchQuery = '', channelPhoto = null }: Props = $props();
 
 	function highlightText(html: string, query: string): string {
 		if (!query || !query.trim()) return html;
@@ -24,7 +25,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<article class="tg-msg-wrap" class:is-selected={isSelected} onclick={onToggle}>
+<article class="tg-msg-wrap" class:is-selected={isSelected} onclick={onToggle} data-msg-id={msgId}>
 	<div class="avatar-tap-wrapper">
 		<Avatar name={msg.sender} photo={msg.channel_photo || channelPhoto} size="34px" fontSize="0.7rem" />
 		{#if isSelected}
